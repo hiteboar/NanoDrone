@@ -20,8 +20,9 @@ void setup() {
   Serial.begin(9600);
   while (!Serial);
   mCurrentMillis = millis();
-  mEngineController.Init();
   mBluetoothController.Init();
+  mEngineController.Init();
+  //mBluetoothController.ValueReceivedCallback(bool (*aCallback)(unsigned char))
 
   //Init fly sensor
   Serial.println("Init fly sensor...");
@@ -35,8 +36,8 @@ void loop() {
   }
 
   mFlySensor.Update();
-  mEngineController.Update();
   mBluetoothController.Update();
+  mEngineController.Update();
 
 }
 

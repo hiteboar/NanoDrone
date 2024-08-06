@@ -27,11 +27,11 @@ void EngineController::Update(){
 }
 
 void EngineController::SetEnginePower(EngineID aEngine, int aPower){
-
+  mEngines[aEngine]->SetPower(aPower);
 }
 
 void EngineController::AddEnginePower(EngineID aEngine, int aPower){
-
+  mEngines[aEngine]->AddPower(aPower);
 }
 
 void EngineController::DoMove(MovementID aMove, int speed){

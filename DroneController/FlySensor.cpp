@@ -50,7 +50,7 @@ void FlySensor::Init(){
 
 void FlySensor::Update(){
   ReadIMUValues(mPitch, mRoll, mYaw);
-  Serial.println("Yaw: "+ String(mPitch) + " Pitch: " + String(mRoll) + " Roll: " + String(mYaw));
+  //Serial.println("Yaw: "+ String(mPitch) + " Pitch: " + String(mRoll) + " Roll: " + String(mYaw));
 }
 
 float FlySensor::Pitch(){
