@@ -4,11 +4,11 @@ BluetoothController::BluetoothController(const char* aDeviceName)
 {
   mDeviceName = aDeviceName;
 }
-/*
-void BluetoothController::ValueReceivedCallback(bool (*aCallback)(unsigned char)){
+
+void BluetoothController::ValueReceivedCallback(bool (*aCallback)(unsigned int)){
   mCallback = aCallback;
 }
-  */
+
 void BluetoothController::Init(){
   
   Serial.println("[BLUETOOTH CONTROLLER] Initializing device...");
@@ -45,9 +45,8 @@ void BluetoothController::Update(){
     }
 
     if (mEngineCharacteristic.written()){
-      //mCallback( mEngineCharacteristic.value());
+      mCallback(mEngineCharacteristic.value());
       //__raise OnActionReceived(mEngineCharacteristic.value);
-      Serial.println(mEngineCharacteristic.value());
     }
 
   }
