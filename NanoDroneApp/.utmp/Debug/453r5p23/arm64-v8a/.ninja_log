@@ -1,0 +1,11 @@
+# ninja log v5
+2	13379	7452518027572439	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	9f4e85091f885322
+449	14447	7452518035675416	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	ad7687459d149c65
+970	14471	7452518038683161	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	4fd1d53ba13019d2
+1177	14605	7452518041421676	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	cb7162184ddb222f
+949	15824	7452518055051006	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	f73524ee5b03a7f9
+14448	16080	7452518059733213	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	1af7f6aa2f92fba4
+772	16443	7452518061425816	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	abb86441119d722
+13393	19732	7452518097193214	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	e9c59ba05d81e76f
+16081	20179	7452518088993602	C:/Users/vicen/Documents/NanoDrone/NanoDroneApp/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/453r5p23/obj/arm64-v8a/libswappywrapper.so	54154ae74025f950
+19733	20853	7452518106281299	C:/Users/vicen/Documents/NanoDrone/NanoDroneApp/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/453r5p23/obj/arm64-v8a/libgame.so	5b3f6d5e342ce558

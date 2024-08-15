@@ -1,0 +1,8 @@
+C:/Users/vicen/Documents/NanoDrone/NanoDroneApp/.utmp/Debug/2l5a2d1f/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/vicen/Documents/NanoDrone/NanoDroneApp/.utmp/Debug/2l5a2d1f/arm64-v8a/CMakeFiles/rebuild_cache.dir
+C:/Users/vicen/Documents/NanoDrone/NanoDroneApp/.utmp/Debug/2l5a2d1f/arm64-v8a/GameActivity/CMakeFiles/game.dir
+C:/Users/vicen/Documents/NanoDrone/NanoDroneApp/.utmp/Debug/2l5a2d1f/arm64-v8a/GameActivity/CMakeFiles/edit_cache.dir
+C:/Users/vicen/Documents/NanoDrone/NanoDroneApp/.utmp/Debug/2l5a2d1f/arm64-v8a/GameActivity/CMakeFiles/rebuild_cache.dir
+C:/Users/vicen/Documents/NanoDrone/NanoDroneApp/.utmp/Debug/2l5a2d1f/arm64-v8a/FramePacing/CMakeFiles/swappywrapper.dir
+C:/Users/vicen/Documents/NanoDrone/NanoDroneApp/.utmp/Debug/2l5a2d1f/arm64-v8a/FramePacing/CMakeFiles/edit_cache.dir
+C:/Users/vicen/Documents/NanoDrone/NanoDroneApp/.utmp/Debug/2l5a2d1f/arm64-v8a/FramePacing/CMakeFiles/rebuild_cache.dir
