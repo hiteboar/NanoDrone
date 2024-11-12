@@ -1,6 +1,7 @@
 #include "api/Common.h"
 #include "FlySensor.h"
 #include "Arduino.h"
+#include "LedDebug.h"
 
 void FlySensor::ReadIMUValues(float &aPitch, float &aRoll, float &aHeading){
   // values for acceleration and rotation:
@@ -28,13 +29,16 @@ FlySensor::FlySensor(float aSampleFreq){
 }
 
 void FlySensor::Init(){
-  Serial.println("Starting IMU...");
+  //Serial.println("Starting IMU...");
+  mIsActive = false;
   if (!IMU.begin()) {
-    while (1);
+    LedDebug::GetInstance()->AddError(LedDebug::ErrorType::IMU_ERROR);
+    return;
   }
         
   // start the filter to run at the sample rate:
   filter.begin(mSampleFreq);
+  /*
   Serial.println("IMU sensor rate set at " + String(mSampleFreq));
 
   Serial.print("Gyroscope sample rate = ");
@@ -46,6 +50,9 @@ void FlySensor::Init(){
   Serial.println("Hz");
 
   Serial.println("IMU Start: DONE!");
+  */
+
+  mIsActive = true;
 }
 
 void FlySensor::Update(){
@@ -63,4 +70,8 @@ float FlySensor::Yaw(){
 
 float FlySensor::Roll(){
   return mRoll;
+}
+
+bool FlySensor::IsActive(){
+  return mIsActive;
 }

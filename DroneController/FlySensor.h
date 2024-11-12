@@ -3,6 +3,8 @@
 
 class FlySensor{
   private:
+    float mIsActive = false;
+
     float mSampleFreq = 0; // Update freq of the sensor
     float mYaw, mPitch, mRoll; // Yaw, pitch and roll values
     Madgwick filter; // filter needed to calculate the yaw pitch and roll of the borad
@@ -18,4 +20,6 @@ class FlySensor{
     float Pitch();
     float Yaw();
     float Roll();
+
+    bool IsActive();
 };

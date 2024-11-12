@@ -11,12 +11,12 @@ EngineController::EngineController(){
 }
 
 void EngineController::Init(){
-  Serial.println("[ENGINE CONTROLLER] Init Engines...");
+  //Serial.println("[ENGINE CONTROLLER] Init Engines...");
   mEngines[EngineID::FR_ENGINE]->Init();
   mEngines[EngineID::FL_ENGINE]->Init();
   mEngines[EngineID::RR_ENGINE]->Init();
   mEngines[EngineID::RL_ENGINE]->Init();
-  Serial.println("[ENGINE CONTROLLER] Init Done!");
+  //Serial.println("[ENGINE CONTROLLER] Init Done!");
 }
 
 void EngineController::Update(){
