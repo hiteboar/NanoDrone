@@ -2,8 +2,6 @@
     <string name="app_name">NanoDroneApp</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
 
     <string name="action_settings">Settings</string>
@@ -15,6 +13,10 @@
     <string name="menu_Settings">Bluetooth</string>
 
     <string name="home_text">Home Fragment</string>
+
+    <!-- HEADER MAIN TEXT -->
+    <string name="Connected_device_title">Connected Device:</string>
+    <string name="Default_device_name">No device Connected</string>
 
     <!-- BLUETOOTH FRAMGEMENT TEXT -->
     <string name="Bluetooth_settings_title">Bluetooth Config</string>

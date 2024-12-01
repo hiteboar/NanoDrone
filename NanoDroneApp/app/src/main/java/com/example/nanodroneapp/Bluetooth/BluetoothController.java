@@ -3,16 +3,16 @@ package com.example.nanodroneapp.Bluetooth;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import com.example.nanodroneapp.Bluetooth.Communicatoin.BluetoothCommunication;
+import com.example.nanodroneapp.Bluetooth.Communicatoin.BluetoothCommunicationListener;
 import com.example.nanodroneapp.Bluetooth.Scanner.BluetoothDevicesList;
 import com.example.nanodroneapp.Bluetooth.Scanner.BluetoothScanCallback;
 import com.example.nanodroneapp.Bluetooth.Scanner.BluetoothScanner;
+import com.example.nanodroneapp.R;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -42,25 +42,11 @@ public class BluetoothController {
     private final UUID DEVICE_UUID = UUID.fromString("800713BC-3AF7-4CA1-9029-CA765444188F");
     private static final String TAG = "BluetoothLeService";
 
-    // Connected device name
-    private BluetoothDevice mConnectedDevice = null;
-
-    @SuppressLint("MissingPermission")
-    public String GetDeviceName(){
-        if (mConnectedDevice != null)
-            return mConnectedDevice.getName();
-        else
-            return "";
-    }
-
-    //Return true if there is some device connected
-    public boolean IsConnected() { return mConnectedDevice != null; }
-
     //Return true if it is scanning for devices
     private boolean mIsScanning;
     public boolean IsScanning() { return mIsScanning; }
 
-    private ArrayList<BluetoothScannerListener> mListeners;
+    private BluetoothLEListener mListener;
 
     // Singleton
     private static BluetoothController mController;
@@ -72,7 +58,6 @@ public class BluetoothController {
     }
 
     private BluetoothController(){
-        mConnectedDevice = null;
         mIsScanning = false;
     }
 
@@ -93,9 +78,6 @@ public class BluetoothController {
 
         Activity activity = (Activity) aContext;
         mScanner = new BluetoothScanner(activity, mBluetoothScanCallback);
-
-        IntentFilter filter = new IntentFilter();
-        aContext.registerReceiver(new BluetoothReceiver(), filter);
     }
 
     // Scan for other bluetooth devices
@@ -109,43 +91,29 @@ public class BluetoothController {
         SendOnStopScan();
     }
 
-    public void AddListener(BluetoothScannerListener aListener){
-        if (mListeners == null) mListeners = new ArrayList<BluetoothScannerListener>();
-        if (mListeners.contains(aListener)) return;
-        mListeners.add(aListener);
-    }
-
-    public void RemoveListener(BluetoothScannerListener aListener){
-        if (mListeners != null && mListeners.contains(aListener)){
-            mListeners.remove(aListener);
-        }
+    public void SetListener(BluetoothLEListener aListener){
+        mListener = aListener;
     }
 
     public void ClearListeners(){
-        mListeners.clear();
+        mListener = null;
     }
 
     private void SendOnDeviceFound(BluetoothDevice aNewDevice){
-        if(mListeners != null) {
-            for (int i = 0; i < mListeners.size(); ++i) {
-                mListeners.get(i).OnDeviceDetected(aNewDevice);
-            }
+        if(mListener != null) {
+            mListener.OnDeviceDetected(aNewDevice);
         }
     }
 
     private void SendOnStartScan() {
-        if(mListeners != null) {
-            for (int i = 0; i < mListeners.size(); ++i) {
-                mListeners.get(i).OnStartScan();
-            }
+        if(mListener != null) {
+            mListener.OnStartScan();
         }
     }
 
     private void SendOnStopScan() {
-        if(mListeners != null) {
-            for (int i = 0; i < mListeners.size(); ++i) {
-                mListeners.get(i).OnStopScan();
-            }
+        if(mListener != null) {
+            mListener.OnStopScan();
         }
     }
 
@@ -154,25 +122,54 @@ public class BluetoothController {
     public void Connect(String aDeviceAddress){
         if (mBluetoothCommunication == null) {
             StopScan();
-            mBluetoothCommunication = new BluetoothCommunication(mContext, mDeviceList.GetDevice(aDeviceAddress)) {
-                @Override
-                public void OnDataReceived(byte[] aData) {
-                    super.OnDataReceived(aData);
-                    Log.i(TAG, "Received data: " + new String(aData));
-                }
-            };
+            mBluetoothCommunication = new BluetoothCommunication(mContext, mDeviceList.GetDevice(aDeviceAddress), mBluetoothCommunicationListener);
             mBluetoothCommunication.StartCommunication();
-        }
-        else{
-            mBluetoothCommunication.WriteData(new byte[]{0x12, 0x34, 0x56});
         }
     }
 
 
     @SuppressLint("MissingPermission")
     public void Disconnect(){
-        if (mBluetoothCommunication != null)
+        if (mBluetoothCommunication != null) {
             mBluetoothCommunication.EndCommunication();
+            if (mListener != null)
+                mListener.OnDisconnect();
+        }
     }
+
+    @SuppressLint("MissingPermission")
+    public String GetDeviceName(){
+        if (mBluetoothCommunication != null && mBluetoothCommunication.IsConnected() && mBluetoothCommunication.GetDevice() != null)
+            return mBluetoothCommunication.GetDevice().getName();
+        else
+            return "";
+    }
+
+    //Return true if there is some device connected
+    public boolean IsConnected() { return mBluetoothCommunication != null && mBluetoothCommunication.IsConnected(); }
+
+    private BluetoothCommunicationListener mBluetoothCommunicationListener = new BluetoothCommunicationListener() {
+        @Override
+        public void OnStartCommunication() {
+            if (mListener != null)
+                mListener.OnStartConnection();
+        }
+
+        @Override
+        public void OnConnectionEstablished() {
+            if (mListener != null)
+                mListener.OnConnect();
+        }
+
+        @Override
+        public void OnDataReceived(byte[] aData) {
+            // IMPLEMENT ON DATA RECEIVED
+        }
+
+        @Override
+        public void OnConnectionLost() {
+            Disconnect();
+        }
+    };
 }
 

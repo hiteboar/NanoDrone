@@ -6,8 +6,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.nanodroneapp.Bluetooth.BluetoothController;
 import com.example.nanodroneapp.ui.DebugFragment;
 import com.example.nanodroneapp.ui.HomeFragment;
 import com.google.android.material.navigation.NavigationView;
@@ -24,7 +27,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     private DrawerLayout drawerLayout;
     private String[] mNeededPermissions = new String[]{
@@ -111,6 +114,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             getSupportFragmentManager().beginTransaction().replace(R.id.nav_host_fragment_content_main, new HomeFragment()).commit();
         }
 
+        String lDeviceName = BluetoothController.Instance().GetDeviceName();
+        if (lDeviceName == null || lDeviceName == ""){
+            lDeviceName = getString(R.string.Default_device_name);
+        }
+        ((TextView)findViewById(R.id.Header_ConnectedDeviceName)).setText(lDeviceName);
+
         drawerLayout.closeDrawer(GravityCompat.START);
      return true;
     }
@@ -118,26 +127,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//
-//        switch (requestCode) {
-//            case MULTIPLE_PERMISSIONS:
-//                if (grantResults.length > 0) {
-//                    boolean recordPermission = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-//                    boolean writeExternalFile = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-//                    if(recordPermission && writeExternalFile)
-//                    {
-//                        // put your function here
-//                    }
-//                }
-//                else {
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                        requestPermissions(
-//                                new String[]{Manifest.permission
-//                                        .WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO},
-//                                MULTIPLE_PERMISSIONS);
-//                    }
-//                }
-//
-//        }
     }
 }

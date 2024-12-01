@@ -3,25 +3,31 @@ package com.example.nanodroneapp;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.nanodroneapp.Bluetooth.BluetoothController;
-import com.example.nanodroneapp.Bluetooth.BluetoothScannerListener;
+import com.example.nanodroneapp.Bluetooth.BluetoothLEListener;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.concurrent.TimeUnit;
 
 
 public class BluetoothConnectionFragment extends Fragment {
@@ -38,48 +44,58 @@ public class BluetoothConnectionFragment extends Fragment {
     private class BluetoothItem{
         private String mName;
         private String mAddress;
+        public boolean IsSelected = false;
+
+        private View mView;
+
         public BluetoothItem(String aName, String aAddress){
             mName = aName;
             mAddress = aAddress;
+            IsSelected = false;
         }
 
         public String getName(){ return mName;}
         public String getAddress(){ return mAddress;}
     }
 
-    private TextView mScannerStatus;
+    private View mView;
+
+    private TextView GetScannerStatus(){ return mView.findViewById(R.id.ScannerStatus); }
+    private TextView GetConnectedDeviceName(){ return mView.findViewById(R.id.ConnectedDeviceName); }
+    private Button GetConnectButton(){ return mView.findViewById(R.id.BluetoothConnectButton); }
+    private Button GetScanButton(){ return mView.findViewById(R.id.BluetoothScanButton); }
+
+
     private BluetoothItem mSelectedBluetoothDevice = null;
+
+    private static final String TAG = "BluetoothConnectionFragment";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_bluetooth, container, false);
-
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Intitialize the buttons
-        Button lScanButton = (Button) view.findViewById(R.id.BluetoothScanButton);
-        Button lConnectButton = (Button) view.findViewById(R.id.BluetoothConnectButton);
+        mView = view;
 
-        lScanButton.setOnClickListener(new View.OnClickListener()
+        //Initilize buttons
+        GetScanButton().setOnClickListener(new View.OnClickListener()
         {
             public void onClick(View v)
             {
                 if (mAdapter != null){
-//                    mSelectedBluetoothDevice = null;
-//                    mAdapter.clear();
-//                    mAdapter.notifyDataSetChanged();
                     BluetoothController.Instance().Scan();
                 }
             }
         });
 
-        lConnectButton.setOnClickListener(new View.OnClickListener() {
+        GetConnectButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Connect to the selected device int list
@@ -88,10 +104,6 @@ public class BluetoothConnectionFragment extends Fragment {
                 }
             }
         });
-
-        //Get scan status text view
-        mScannerStatus = (TextView) view.findViewById(R.id.ScannerStatus);
-
 
         // Initilialize the list
         ListView lList = (ListView) view.findViewById(R.id.BluetoothDevicesList);
@@ -104,11 +116,17 @@ public class BluetoothConnectionFragment extends Fragment {
         // Initialize the Bluetooth Controller and set the callback listener
         BluetoothFragmentListener lBluetoothFragmentListener = new BluetoothFragmentListener();
         BluetoothController.Instance().Init(getContext());
-        BluetoothController.Instance().AddListener(lBluetoothFragmentListener);
-
+        BluetoothController.Instance().SetListener(lBluetoothFragmentListener);
     }
 
-    private class BluetoothFragmentListener extends BluetoothScannerListener {
+    @Override
+    public void onDestroyView() {
+        GetConnectButton().setOnClickListener(null);
+        GetScanButton().setOnClickListener(null);
+        super.onDestroyView();
+    }
+
+    private class BluetoothFragmentListener extends BluetoothLEListener {
 
         @SuppressLint("MissingPermission")
         @Override
@@ -123,18 +141,34 @@ public class BluetoothConnectionFragment extends Fragment {
 
         @Override
         public void OnStartScan() {
-            mScannerStatus.setText(getString(R.string.Bluetooth_settings_scanning));
+            GetScannerStatus().setText(getString(R.string.Bluetooth_settings_scanning));
         }
 
         @Override
         public void OnStopScan() {
-            mScannerStatus.setText(getString(R.string.Bluetooth_settings_scan_completed));
+            GetScannerStatus().setText(getString(R.string.Bluetooth_settings_scan_completed));
+        }
+
+        @Override
+        public void OnStartConnection() {
+            GetScannerStatus().setText("Connecting...");
+        }
+
+        @Override
+        public void OnConnect() {
+            GetScannerStatus().setText("Connected");
+            GetConnectedDeviceName().setText(BluetoothController.Instance().GetDeviceName());
+        }
+
+        @Override
+        public void OnDisconnect() {
+            //mConnectedDeviceName.setText(getString(R.string.Default_device_name));
         }
     }
 
 
     // Custrom ArrayAdapter to show all the bluetooth device info
-    class BluetoothItemAdapter extends ArrayAdapter<BluetoothItem> {
+    private class BluetoothItemAdapter extends ArrayAdapter<BluetoothItem> {
 
         private Context mContext;
         private int mResourceID;
@@ -143,6 +177,13 @@ public class BluetoothConnectionFragment extends Fragment {
             super(aContext, aResourceID, aItems);
             mContext = aContext;
             mResourceID = aResourceID;
+        }
+
+        public void SelectItem(int aPosition){
+            int lCount = getCount();
+            for (int i = 0; i < lCount; ++i) {
+                getItem(i).IsSelected = (i == aPosition);
+            }
         }
 
         @NonNull
@@ -162,17 +203,22 @@ public class BluetoothConnectionFragment extends Fragment {
             lDeviceNameTextView.setText(lItem.getName());
             lDeviceAdressTextView.setText(lItem.getAddress());
 
+            lView.setBackgroundColor(lItem.IsSelected ? Color.LTGRAY : Color.TRANSPARENT);
+
             //Set OnClick listener to the item
             lView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     BluetoothItem lItem = getItem(aPosition);
                     mSelectedBluetoothDevice = lItem;
+                    SelectItem(aPosition);
+                    mAdapter.notifyDataSetChanged();
                 }
             });
 
             return lView;
         }
     }
+
 }
 

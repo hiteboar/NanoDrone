@@ -1,4 +1,4 @@
-package com.example.nanodroneapp.Bluetooth;
+package com.example.nanodroneapp.Bluetooth.Communicatoin;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
@@ -12,7 +12,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import java.util.List;
 import java.util.UUID;
 
 
@@ -25,25 +24,46 @@ public class BluetoothCommunication{
     private BluetoothGatt mBluetoothGatt;
     private BluetoothGattService mBluetoothGattService;
     private BluetoothGattCharacteristic mBluetoothGattCharacteristic;
-
-    private BluetoothDevice mConnectedDevice;
+    private BluetoothCommunicationListener mListener;
 
     private UUID CHARACTERISTIC_UUID = UUID.fromString("800713BC-3AF7-4CA1-9029-CA765444188F");
     private UUID SERVICE_UUID = UUID.fromString("800713BC-3AF7-4CA1-9029-CA765444188F");
 
+    private boolean mIsConnected = false;
+    public boolean IsConnected(){ return mIsConnected; }
 
     BluetoothGattCallback mBluetoothGattCallback = new BluetoothGattCallback() {
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            super.onServicesDiscovered(gatt, status);
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                mBluetoothGattService = gatt.getService(SERVICE_UUID);
+                if (mBluetoothGattService != null) {
+                    Log.i(TAG, "Service characteristic UUID found: " + mBluetoothGattService.getUuid().toString());
+                    mBluetoothGattCharacteristic = mBluetoothGattService.getCharacteristic(CHARACTERISTIC_UUID);
+                    mIsConnected = true;
+                    mListener.OnConnectionEstablished();
+                } else {
+                    Log.i(TAG, "Service characteristic not found for UUID: " + SERVICE_UUID);
+                }
+            }
+        }
+
+        @Override
+        public void onServiceChanged(@NonNull BluetoothGatt gatt) {
+            super.onServiceChanged(gatt);
+        }
+
         @SuppressLint("MissingPermission")
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                mConnectedDevice = gatt.getDevice();
-                mBluetoothGattService = gatt.getService(SERVICE_UUID);
-                mBluetoothGattCharacteristic = mBluetoothGattService.getCharacteristic(CHARACTERISTIC_UUID);
-                Log.i(TAG, "Connected to device: " + mConnectedDevice.getName());
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                mConnectedDevice = null;
-                Log.i(TAG, "Disconnected from device");
+            super.onConnectionStateChange(gatt, status, newState);
+            if (status != newState && newState == BluetoothProfile.STATE_CONNECTED) {
+                mBluetoothGatt.discoverServices();
+            }
+            else if (newState == BluetoothProfile.STATE_DISCONNECTED){
+                mListener.OnConnectionLost();
             }
         }
 
@@ -53,8 +73,8 @@ public class BluetoothCommunication{
 
             if (status == BluetoothGatt.GATT_SUCCESS)
             {
-                byte[] data = characteristic.getValue();
-                OnDataReceived(data);
+                byte[] lData = characteristic.getValue();
+                mListener.OnDataReceived(lData);
             }
         }
 
@@ -69,14 +89,17 @@ public class BluetoothCommunication{
     };
 
 
-    public BluetoothCommunication(Context aContext, BluetoothDevice aDevice){
+    public BluetoothCommunication(Context aContext, BluetoothDevice aDevice, BluetoothCommunicationListener aListener){
         mContext = aContext;
         mDevice = aDevice;
+        mListener = aListener;
     }
 
     @SuppressLint("MissingPermission")
     public void StartCommunication(){
+        mIsConnected = false;
         mBluetoothGatt = mDevice.connectGatt(mContext, false, mBluetoothGattCallback);
+        mListener.OnStartCommunication();
     }
 
     @SuppressLint("MissingPermission")
@@ -87,10 +110,13 @@ public class BluetoothCommunication{
         }
     }
 
-    public void OnDataReceived(byte[] aData){}
-
     @SuppressLint("MissingPermission")
     public void EndCommunication(){
-        mBluetoothGatt.disconnect();
+        if (mBluetoothGatt != null)
+            mBluetoothGatt.disconnect();
+    }
+
+    public BluetoothDevice GetDevice(){
+        return mDevice;
     }
 }
