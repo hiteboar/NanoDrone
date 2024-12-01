@@ -1,4 +1,4 @@
-package com.example.nanodroneapp.Bluetooth;
+package com.example.nanodroneapp.Bluetooth.Scanner;
 
 import android.bluetooth.BluetoothDevice;
 

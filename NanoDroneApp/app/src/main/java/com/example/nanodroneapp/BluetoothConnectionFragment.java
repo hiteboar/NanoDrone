@@ -17,7 +17,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.nanodroneapp.Bluetooth.BluetoothListener;
+import com.example.nanodroneapp.Bluetooth.BluetoothController;
+import com.example.nanodroneapp.Bluetooth.BluetoothScannerListener;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -107,7 +108,7 @@ public class BluetoothConnectionFragment extends Fragment {
 
     }
 
-    private class BluetoothFragmentListener extends BluetoothListener {
+    private class BluetoothFragmentListener extends BluetoothScannerListener {
 
         @SuppressLint("MissingPermission")
         @Override

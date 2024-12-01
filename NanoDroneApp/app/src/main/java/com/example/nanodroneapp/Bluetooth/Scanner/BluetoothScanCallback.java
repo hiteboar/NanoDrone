@@ -1,4 +1,4 @@
-package com.example.nanodroneapp.Bluetooth;
+package com.example.nanodroneapp.Bluetooth.Scanner;
 
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;

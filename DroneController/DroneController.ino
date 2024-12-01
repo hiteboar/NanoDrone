@@ -33,7 +33,6 @@ bool OnBluetoothReceived(unsigned int aData) {
     Serial.print(" -SET MODE- ");
   }
 
-/*
   Serial.print(" Engine1: ");
   Serial.print(lEngine1);
   Serial.print(" Engine2: ");
@@ -42,7 +41,6 @@ bool OnBluetoothReceived(unsigned int aData) {
   Serial.print(lEngine3);
   Serial.print(" Engine4: ");
   Serial.println(lEngine4);
-*/
 
   mEngineController.SetEnginePower(EngineController::EngineID::FR_ENGINE, (lEngine1 / 100) * 255);
   mEngineController.SetEnginePower(EngineController::EngineID::FL_ENGINE, (lEngine2 / 100) * 255);

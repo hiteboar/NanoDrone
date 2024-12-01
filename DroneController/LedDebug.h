@@ -12,9 +12,10 @@ class LedDebug {
 public:
   enum ErrorType {
     NONE = 0,
-    BLUETOOTH_ERROR = 1,
-    ENGINE_ERROR = 2,
-    IMU_ERROR = 3
+    BLUETOOTH_DISCONNECTED = 1,
+    BLUETOOTH_ERROR = 2,
+    ENGINE_ERROR = 3,
+    IMU_ERROR = 4
   };
 
   void Init(int aLedPin);

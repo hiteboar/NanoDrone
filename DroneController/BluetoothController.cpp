@@ -41,6 +41,7 @@ void BluetoothController::Init(){
 
   // start advertising
   BLE.advertise();
+  LedDebug::GetInstance()->AddError(LedDebug::ErrorType::BLUETOOTH_DISCONNECTED);
   //Serial.println("[BLUETOOTH CONTROLLER] Device active, waiting for connections.");
 }
   
@@ -50,19 +51,21 @@ void BluetoothController::Update(){
     BLE.poll();
     if (!mIsConnected){
       mIsConnected = true;
-      //Serial.println("[BLUETOOTH CONTROLLER] Bluetooth Connected");
+    LedDebug::GetInstance()->RemoveError(LedDebug::ErrorType::BLUETOOTH_DISCONNECTED);
     }
 
     if (mEngineCharacteristic.written()){
-      /*Serial.println("RECEIVED MESSAGE:");
-      Serial.println(mEngineCharacteristic.value());*/
+      //Serial.println("RECEIVED MESSAGE:");
+      //Serial.println(mEngineCharacteristic.value());
       mCallback(mEngineCharacteristic.value());
-      //__raise OnActionReceived(mEngineCharacteristic.value);
     }
 
   }
   else if (mIsConnected){
     mIsConnected = false;
+    if (!LedDebug::GetInstance()->ContainsError(LedDebug::ErrorType::BLUETOOTH_DISCONNECTED)){
+      LedDebug::GetInstance()->AddError(LedDebug::ErrorType::BLUETOOTH_DISCONNECTED);
+    }
     //Serial.println("[BLUETOOTH CONTROLLER] Bluetooth Disconnected");
   }
 }
