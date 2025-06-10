@@ -1,0 +1,3 @@
+[submodule "NanoDrone_UnityApp"]
+	path = NanoDrone_UnityApp
+	url = https://github.com/hiteboar/NanoDrone_UnityApp.git

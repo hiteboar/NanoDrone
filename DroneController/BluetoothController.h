@@ -1,23 +1,30 @@
+#ifndef BLUETOOTHCONTROLLER_H
+#define BLUETOOTHCONTROLLER_H
+
 #include <ArduinoBLE.h>
-#include <stdio.h>
 
-class BluetoothController{
+class BluetoothController {
+public:
+    BluetoothController();
+    void begin();
+    void statusUpdate();
+    void UpdateDataToSend(uint8_t yaw, uint8_t pitch, uint8_t roll, uint8_t altitude);
 
-  private:
-  BLEService mBluetoothService{"800713BC-3AF7-4CA1-9029-CA765444188F"};
-  BLEIntCharacteristic mEngineCharacteristic{"800713BC-3AF7-4CA1-9029-CA765444188F", BLERead | BLEWrite};
-  bool mIsConnected = false;
-  bool mIsActive = false;
-  const char* mDeviceName;
-  bool (*mCallback)(unsigned int);
+private:
+    void tryInitBLE();
+    void sendFlightData();
+    void processIncomingData();
 
-  public:
-  BluetoothController(const char* aDeviceName);
-  
-  void ValueReceivedCallback(bool (*aCallback)(unsigned int));
+    uint8_t _yaw;
+    uint8_t _pitch;
+    uint8_t _roll;
+    uint8_t _altitude;
 
-  void Init();
-  void Update();
-  bool IsActive();
-
+    BLEService mService;
+    BLECharacteristic mCharacteristic;
+    BLEDevice central;
+    bool connected;
+    bool bleAvailable;
 };
+
+#endif

@@ -5,7 +5,7 @@
 #include "LedDebug.h"
 
 // LOOP
-#define LOOP_TIME 10               // target delta time in ms
+#define LOOP_TIME 500               // target delta time in ms
 #define SERIAL_CHECK_TIMEOUT 2000  // max time to connect with the Serial Monitor
 
 // IMU
@@ -13,54 +13,30 @@
 
 FlySensor mFlySensor(SENSOR_RATE);
 EngineController mEngineController;
-BluetoothController mBluetoothController("NanoDronev2");
+BluetoothController mBluetoothController;
 
 long mCurrentMillis = 0;
 long mLastMillis = 0;
 
-bool OnBluetoothReceived(unsigned int aData) {
-
-  unsigned int lMode = (aData >> 31);
-  unsigned int lEngine1 = (aData >> 24) & 127;
-  unsigned int lEngine2 = (aData >> 17) & 127;
-  unsigned int lEngine3 = (aData >> 10) & 127;
-  unsigned int lEngine4 = (aData >> 3) & 127;
-
-  // CHECK DATA MODE
-  if (lMode == 0) {  // ADD MODE
-    Serial.print(" -ADD MODE- ");
-  } else {  // SET MODE
-    Serial.print(" -SET MODE- ");
-  }
-
-  Serial.print(" Engine1: ");
-  Serial.print(lEngine1);
-  Serial.print(" Engine2: ");
-  Serial.print(lEngine2);
-  Serial.print(" Engine3: ");
-  Serial.print(lEngine3);
-  Serial.print(" Engine4: ");
-  Serial.println(lEngine4);
-
-  mEngineController.SetEnginePower(EngineController::EngineID::FR_ENGINE, (lEngine1 / 100) * 255);
-  mEngineController.SetEnginePower(EngineController::EngineID::FL_ENGINE, (lEngine2 / 100) * 255);
-  mEngineController.SetEnginePower(EngineController::EngineID::RR_ENGINE, (lEngine3 / 100) * 255);
-  mEngineController.SetEnginePower(EngineController::EngineID::RL_ENGINE, (lEngine4 / 100) * 255);
+/*
+bool OnBluetoothReceived(BluetoothController::ReceivedData aData) {
+  mEngineController.SetEnginePower(EngineController::EngineID::FR_ENGINE, aData.Engine1);
+  mEngineController.SetEnginePower(EngineController::EngineID::FL_ENGINE, aData.Engine2);
+  mEngineController.SetEnginePower(EngineController::EngineID::RR_ENGINE, aData.Engine3);
+  mEngineController.SetEnginePower(EngineController::EngineID::RL_ENGINE, aData.Engine4);
 }
+*/
 
 void setup() {
- /*
   Serial.begin(9600);
   while (!Serial);
-*/
 
   LedDebug::GetInstance()->Init(13);
 
   mCurrentMillis = millis();
   mEngineController.Init();
   mFlySensor.Init();
-  mBluetoothController.Init();
-  mBluetoothController.ValueReceivedCallback(OnBluetoothReceived);
+  mBluetoothController.begin();
 }
 
 void loop() {
@@ -73,19 +49,15 @@ void loop() {
     mFlySensor.Update();
   }
   else{
-    //mFlySensor.Init();
+    mFlySensor.Init();
   }
 
-  if (mBluetoothController.IsActive()){
-    mBluetoothController.Update();
-  }
-  else{
-    //mBluetoothController.Init();
-  }
-
+  mBluetoothController.statusUpdate();
   mEngineController.Update();
 
   LedDebug::GetInstance()->Update();
+
+  mBluetoothController.UpdateDataToSend(mFlySensor.Yaw(), mFlySensor.Pitch(), mFlySensor.Roll(), 0);
 }
 
 long UpdateLoopTime() {
