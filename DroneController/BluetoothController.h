@@ -21,7 +21,8 @@ private:
     uint8_t _altitude;
 
     BLEService mService;
-    BLECharacteristic mCharacteristic;
+    BLECharacteristic rxCharacteristic;
+    BLECharacteristic txCharacteristic;
     BLEDevice central;
     bool connected;
     bool bleAvailable;

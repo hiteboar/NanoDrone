@@ -5,7 +5,7 @@
 #include "LedDebug.h"
 
 // LOOP
-#define LOOP_TIME 500               // target delta time in ms
+#define LOOP_TIME 20               // target delta time in ms
 #define SERIAL_CHECK_TIMEOUT 2000  // max time to connect with the Serial Monitor
 
 // IMU

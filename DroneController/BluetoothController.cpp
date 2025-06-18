@@ -1,8 +1,9 @@
 #include "BluetoothController.h"
 
 BluetoothController::BluetoothController()
-  : mService("19B10001-E8F2-537E-4F6C-D104768A1214"),
-    mCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLENotify | BLEWrite, 4),
+  : mService("19B10000-E8F2-537E-4F6C-D104768A1214"), // Servicio base
+    rxCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLEWrite, 4),   // Central → Arduino
+    txCharacteristic("19B10002-E8F2-537E-4F6C-D104768A1214", BLENotify, 4),  // Arduino → Central
     connected(false),
     bleAvailable(false)
 {}
@@ -16,7 +17,8 @@ void BluetoothController::tryInitBLE() {
     BLE.setLocalName("NanoDrone");
     BLE.setAdvertisedService(mService);
 
-    mService.addCharacteristic(mCharacteristic);
+    mService.addCharacteristic(rxCharacteristic);
+    mService.addCharacteristic(txCharacteristic);
     BLE.addService(mService);
 
     BLE.advertise();
@@ -57,38 +59,27 @@ void BluetoothController::statusUpdate() {
 }
 
 void BluetoothController::UpdateDataToSend(uint8_t yaw, uint8_t pitch, uint8_t roll, uint8_t altitude) {
-  if (!bleAvailable || !connected) {
-    return;  // No enviar si BLE no está listo o nadie está conectado
-  }
+  if (!bleAvailable || !connected) return;
+
   _yaw = yaw;
   _pitch = pitch;
   _roll = roll;
   _altitude = altitude;
 }
-  
-void BluetoothController::sendFlightData() {
-  if (!bleAvailable || !connected) {
-    return;  // No enviar si BLE no está listo o nadie está conectado
-  }
-  
-  // Empaquetar en orden: YAW | PITCH | ROLL | ALTITUDE
-  uint8_t buffer[4];
-  buffer[0] = _yaw;
-  buffer[1] = _pitch;
-  buffer[2] = _roll;
-  buffer[3] = _altitude;
 
-  mCharacteristic.writeValue(buffer, sizeof(buffer));
+void BluetoothController::sendFlightData() {
+  if (!bleAvailable || !connected) return;
+
+  uint8_t buffer[4] = { _yaw, _pitch, _roll, _altitude };
+  txCharacteristic.writeValue(buffer, sizeof(buffer));
 }
 
-// BluetoothController.cpp
 void BluetoothController::processIncomingData() {
   if (!connected) return;
 
-  // ¿El central escribió algo en esta characteristic?
-  if (mCharacteristic.written()) {
-    int len = mCharacteristic.valueLength();      // (1) longitud real recibida
-    const uint8_t* data = mCharacteristic.value(); // (2) puntero al buffer interno
+  if (rxCharacteristic.written()) {
+    const uint8_t* data = rxCharacteristic.value();
+    int len = rxCharacteristic.valueLength();
 
     if (len >= 4) {
       uint8_t yaw      = data[0];
@@ -96,7 +87,6 @@ void BluetoothController::processIncomingData() {
       uint8_t roll     = data[2];
       uint8_t altitude = data[3];
 
-      // Ahora haces lo que necesites con estos 4 bytes:
       Serial.print("From central → ");
       Serial.print(yaw);      Serial.print('-');
       Serial.print(pitch);    Serial.print('-');
@@ -105,5 +95,3 @@ void BluetoothController::processIncomingData() {
     }
   }
 }
-
-
